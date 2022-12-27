@@ -52,7 +52,7 @@ class DocumentView(APIView):
         print(Path.home())
 
         try:
-            path = f'./docs/output/Scanned_Output_{datetime.now()}.pdf'
+            path = os.sep.join(['docs', 'output', 'Scanned_Output_{datetime.now()}.pdf'])
             with Path(path).open(mode='wb') as fw:
                 final_lines = '\n'.join(df_final['text'])
                 print('Ok->', final_lines, type(final_lines))
