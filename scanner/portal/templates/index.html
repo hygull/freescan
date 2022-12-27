@@ -94,7 +94,7 @@
             const downloadUrl = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = downloadUrl;
-            a.download = "file.csv";
+            a.download = `Final_Scanned_Report_${new Date()}.pdf`;
             document.body.appendChild(a);
             a.click();
           },

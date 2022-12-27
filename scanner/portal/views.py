@@ -10,6 +10,7 @@ import pandas as pd
 from pathlib import Path
 from datetime import datetime
 from django.http import HttpResponse
+import os
 
 
 class LoginView(View):
@@ -56,8 +57,9 @@ class DocumentView(APIView):
             with Path(path).open(mode='wb') as fw:
                 final_lines = '\n'.join(df_final['text'])
                 print('Ok->', final_lines, type(final_lines))
+                fw.write('Property Scan Findings\n')
                 fw.write(final_lines.encode('utf8'))
-
+                fw.write('\n' + notes)
 
             content_type = 'application/pdf'
             response = HttpResponse(open(path, 'rb'), content_type=content_type)
