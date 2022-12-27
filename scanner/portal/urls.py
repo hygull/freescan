@@ -1,6 +1,6 @@
 from django.urls import path
-from portal.views import LoginView
+from portal.views import DocumentView
 
 urlpatterns = (
-	path('scanner/', LoginView.as_view(), name='login_url'),
+	path('scanner/', DocumentView.as_view(), name='scanner_url'),
 )

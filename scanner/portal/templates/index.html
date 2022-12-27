@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.1/dist/jquery.slim.min.js"></script>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 </head>
@@ -14,7 +15,8 @@
 <div class="container">
   <h2>Scanner</h2>
   <p>Upload & scan your Pdf, search the text into Pdf & generate new Pdf as a final output.</p>
-  <form action="/action_page.php">
+  <form action="">
+    {% csrf_token %}
     <div class="form-group">
     <label for="sel1">Select list:</label>
       <select class="form-control" id="category" required>
@@ -45,7 +47,92 @@
     
     <button type="submit" class="btn btn-primary">Start Scanning</button>
   </form>
+
+  <div style="display:none">
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+  </div>
 </div>
 
+<script type="text/javascript">
+  function csrfSafeMethod(method) {
+      // these HTTP methods do not require CSRF protection
+      return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+  }
+
+  $.ajaxSetup({
+      beforeSend: function(xhr, settings) {
+          if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+              xhr.setRequestHeader("X-CSRFToken", $('input[name="csrfmiddlewaretoken"]').val());
+          }
+      }
+  });
+
+  $(document).ready(function(){
+      $('form').submit(function(event) {
+        alert('Ok')
+        event.preventDefault()
+        const formData = new FormData()
+
+        let category = $('#category').val()        
+        let find_text = $('#find-text').val()
+        let notes = $('#notes').val()
+        let file = $('#file')[0].files[0]
+        console.log(category, find_text, file, notes)
+
+        formData.append('category', category)
+        formData.append('find_text', find_text)
+        formData.append('notes', notes)
+        formData.append('file', file)
+
+        $.ajax({
+          type: "POST",
+          url: '/portal/scanner/',
+          data: formData,
+          success: function(response) {
+            console.log('response', response)
+            const blob = new Blob([response], { type: 'application/pdf' });
+            const downloadUrl = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = downloadUrl;
+            a.download = "file.csv";
+            document.body.appendChild(a);
+            a.click();
+          },
+          error: function(response) {
+            console.log('Failed', response)
+          },
+          dataType: 'json',
+          // contentType: 'multipart/form-data',
+          // contentType: 'application/json',
+          cache : false,
+          processData: false, // TypeError: Illegal invocation,
+          contentType: false,
+          aysnc: false,
+
+          // cache: false,
+          // contentType: false,
+          // enctype: 'multipart/form-data'
+        })
+        // .then(resp => resp.blob())
+        // .then(blob => {
+        //   console.log('blob', blob)
+        //   const url = window.URL.createObjectURL(blob);
+        //   const a = document.createElement('a');
+        //   a.style.display = 'none';
+        //   a.href = url;
+        //   // the filename you want
+        //   a.download = 'todo-1.json';
+        //   document.body.appendChild(a);
+        //   a.click();
+        //   window.URL.revokeObjectURL(url);
+        //   alert('your file has downloaded!'); // or you know, something with better UX...
+        // })
+        // .catch(() => alert('oh no!'));
+
+        return false
+      })
+
+  })
+</script>
 </body>
 </html>
